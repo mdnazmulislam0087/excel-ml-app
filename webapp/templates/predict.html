@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="page-head">
+  <div>
+    <h2>Model Ready ✅</h2>
+    <p class="muted">
+      Target (output): <b>{{ target_col }}</b>
+      {% if train_info and train_info.n_rows %}
+        <span class="dot">•</span> Trained on <b>{{ train_info.n_rows }}</b> rows
+      {% endif %}
+    </p>
+
+    <div class="status status--ok">
+      Trained Model:
+      <b>{{ train_info.model_name if train_info and train_info.model_name else "Model" }}</b>
+      <span class="dot">•</span>
+      <b>{{ train_info.task_type if train_info and train_info.task_type else "Task" }}</b>
+    </div>
+  </div>
+
+  <div class="page-head__actions">
+    <a class="btn btn--ghost" href="/">Train Another</a>
+  </div>
+</section>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card__header">
+      <div class="card__title">Training Summary</div>
+      <div class="card__subtitle">Metrics depend on task + model</div>
+    </div>
+
+    <div class="stats">
+      {% if train_info.task_type == "Regression" %}
+        <div class="stat">
+          <div class="stat__label">Val MSE</div>
+          <div class="stat__value">{{ train_info.val_mse }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Val R²</div>
+          <div class="stat__value">{{ train_info.val_r2 }}</div>
+        </div>
+      {% else %}
+        <div class="stat">
+          <div class="stat__label">Val Accuracy</div>
+          <div class="stat__value">{{ train_info.val_accuracy }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Classification</div>
+          <div class="stat__value">OK</div>
+        </div>
+      {% endif %}
+
+      {% if train_info.model_kind == "mlp" %}
+        <div class="stat">
+          <div class="stat__label">Epochs trained</div>
+          <div class="stat__value">{{ train_info.epochs_trained }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Final loss</div>
+          <div class="stat__value">{{ train_info.final_loss }}</div>
+        </div>
+      {% else %}
+        <div class="stat">
+          <div class="stat__label">Training</div>
+          <div class="stat__value">Trees</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Epochs</div>
+          <div class="stat__value">N/A</div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="note">
+      {% if train_info.did_split %}
+        Validation metrics are from a held-out split.
+      {% else %}
+        Dataset is small, so validation is in-sample (add more rows for fairer metrics).
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__header">
+      <div class="card__title">Training Curve</div>
+      <div class="card__subtitle">Only available for MLP</div>
+    </div>
+
+    {% if plot_url %}
+      <img class="plot" src="{{ plot_url }}" alt="training loss plot">
+    {% else %}
+      <div class="empty">
+        <div class="empty__title">No plot available</div>
+        <div class="empty__text">Random Forest doesn’t have epochs/loss curve.</div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card mt">
+  <div class="card__header">
+    <div class="card__title">Predict</div>
+    <div class="card__subtitle">Enter values using your Excel column headers</div>
+  </div>
+
+  <form class="form form--grid" method="post" action="/predict">
+    {% for col in feature_cols %}
+      <div class="field">
+        <label class="field__label">{{ col }}</label>
+        <input class="field__input"
+               name="{{ col }}"
+               placeholder="Enter value"
+               value="{{ (form_values[col] if form_values and col in form_values else '') }}"
+               required>
+      </div>
+    {% endfor %}
+
+    <div class="actions">
+      <button class="btn btn--primary" type="submit">Predict</button>
+      <a class="btn btn--ghost" href="/">Reset</a>
+    </div>
+  </form>
+
+  {% if prediction is not none %}
+    <div class="result">
+      <div class="result__label">Predicted {{ target_col }}</div>
+      <div class="result__value">{{ prediction }}</div>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

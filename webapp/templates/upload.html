@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero">
+  <div class="hero__left">
+    <h1>Train a model from your Excel file.</h1>
+    <p class="lead">
+      Upload a <b>.xlsx</b> file. The app uses <b>all columns except the last</b> as inputs,
+      and the <b>last column</b> as the output.
+    </p>
+
+    <div class="badges">
+      <span class="badge">Auto-detect numeric + categorical</span>
+      <span class="badge">Choose MLP or Random Forest</span>
+      <span class="badge">Shows training summary</span>
+    </div>
+  </div>
+
+  <div class="hero__right">
+    <div class="card">
+      <div class="card__header">
+        <div class="card__title">Upload & Train</div>
+        <div class="card__subtitle">Excel (.xlsx)</div>
+      </div>
+
+      <form class="form" method="post" action="/train" enctype="multipart/form-data"
+            onsubmit="showLoading()">
+
+        <label class="dropzone">
+          <input id="fileInput" class="fileinput" type="file" name="file" accept=".xlsx"
+                 onchange="showFileName(this)" required>
+          <div class="dropzone__icon">⬆</div>
+          <div class="dropzone__text">
+            <div class="dropzone__headline" id="fileLabel">Drop your Excel file here</div>
+            <div class="dropzone__hint">or click to browse</div>
+          </div>
+        </label>
+
+        <div class="btnrow">
+          <button class="btn btn--primary" type="submit" name="model_kind" value="mlp">
+            Train MLP (Neural Net)
+          </button>
+
+          <button class="btn btn--ghost btn--outline" type="submit" name="model_kind" value="rf">
+            Train Random Forest
+          </button>
+        </div>
+
+        <p class="help">
+          Last column is treated as output. Example:
+          <code>Temp</code>, <code>Pressure</code>, <code>Speed</code>, <code>Output</code>.
+        </p>
+
+        {% if msg %}
+          <div class="alert alert--error">{{ msg }}</div>
+        {% endif %}
+
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+          <div class="loading__text">Training model… please wait</div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="info-grid">
+  <div class="mini">
+    <div class="mini__title">MLP (Neural Net)</div>
+    <div class="mini__text">Supports epochs + training loss curve. Best when you have more rows.</div>
+  </div>
+  <div class="mini">
+    <div class="mini__title">Random Forest</div>
+    <div class="mini__text">Strong baseline, works well on many tabular datasets. No epochs.</div>
+  </div>
+  <div class="mini">
+    <div class="mini__title">Flexible Columns</div>
+    <div class="mini__text">Any number of columns supported. Categorical columns are auto one-hot encoded.</div>
+  </div>
+</section>
+
+<script>
+function showFileName(input) {
+  if (input.files && input.files.length > 0) {
+    document.getElementById("fileLabel").innerText = "Selected: " + input.files[0].name;
+  }
+}
+
+function showLoading() {
+  document.getElementById("loading").classList.remove("hidden");
+}
+</script>
+
+{% endblock %}

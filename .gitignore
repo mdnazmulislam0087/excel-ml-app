@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+
+# Environments
+.env
+.venv/
+venv/
+env/
+.conda/
+conda/
+*.conda
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# App storage (do NOT upload user data/models)
+storage/
+uploads/
+models/
+webapp/static/plots/
+
+# Excel files
+*.xlsx
